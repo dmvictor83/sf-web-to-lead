@@ -481,9 +481,14 @@
       captchaToken: captchaToken
     };
 
+    // NOTE: Content-Type is text/plain (not application/json) on purpose.
+    // It keeps this a CORS "simple request" so the browser skips the OPTIONS
+    // preflight — Salesforce guest Force.com Sites don't answer the preflight,
+    // but they DO return CORS headers on the actual POST. The body is still
+    // JSON; the Apex endpoint reads the raw body and JSON-parses it regardless.
     fetch(SF_ENDPOINT, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
       body:    JSON.stringify(payload)
     })
     .then(function(res) {
