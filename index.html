@@ -6,11 +6,11 @@
   <title>FC Barcelona — Contact Us</title>
 
   <script>
-    // Site "PaymentPortal" has an empty URL path prefix, so the guest REST
-    // endpoint lives at the domain root — NOT under /PaymentPortal.
+    // Dedicated W2L Experience Cloud site (its own isolated guest user,
+    // separate from the payment site). Endpoint lives under the site path.
     var SF_ENDPOINT =
-      'https://orgfarm-6c5e2e6da2-dev-ed.develop.my.salesforce-sites.com' +
-      '/services/apexrest/w2l/';
+      'https://orgfarm-6c5e2e6da2-dev-ed.develop.my.site.com' +
+      '/w2lvforcesite/services/apexrest/w2l/';
   </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
