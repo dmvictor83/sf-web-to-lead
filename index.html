@@ -5,12 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Contact Us</title>
 
-  <!-- Google Places Autocomplete -->
   <script>
-    // Replace with your Google Places API key (restrict to this domain in GCP Console)
-    var GOOGLE_PLACES_API_KEY = 'AIzaSyCRoGQnG_fyUwMTG8aODTBJwrRCtjPTEM8';
-
-    // Salesforce REST endpoint (PaymentPortal site, guest user)
     var SF_ENDPOINT =
       'https://orgfarm-6c5e2e6da2-dev-ed.develop.my.salesforce-sites.com' +
       '/PaymentPortal/services/apexrest/w2l/';
@@ -78,22 +73,19 @@
       box-shadow: 0 0 0 3px rgba(0,112,210,0.15);
     }
 
-    /* Address autocomplete */
-    .address-wrapper { position: relative; }
-    .pac-container   { border-radius: 0 0 0.375rem 0.375rem; font-family: inherit; }
-
-    .address-confirmed {
-      font-size: 0.8rem;
-      color: #04844b;
-      margin-top: 0.4rem;
-      display: none;
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #706e6b;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 1.5rem 0 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #f0f0f0;
     }
-    .address-confirmed::before { content: "✓ "; font-weight: 700; }
 
-    /* reCAPTCHA */
     .captcha-wrap { margin-bottom: 1.5rem; }
 
-    /* Submit */
     .btn-submit {
       width: 100%;
       padding: 0.75rem;
@@ -110,7 +102,6 @@
     .btn-submit:hover:not(:disabled) { background: #005fb2; }
     .btn-submit:disabled { background: #c9c7c5; cursor: not-allowed; }
 
-    /* Banners */
     .error-banner {
       background: #fef1f1;
       border: 1px solid #f4b8b5;
@@ -122,13 +113,11 @@
       display: none;
     }
 
-    /* Success / limit screens */
     .screen {
       text-align: center;
       padding: 3rem 2rem;
       display: none;
     }
-    .screen.active { display: block; }
     .screen-icon {
       width: 64px; height: 64px;
       border-radius: 50%;
@@ -142,17 +131,6 @@
     .screen p  { color: #706e6b; font-size: 0.95rem; }
     .success-screen h2 { color: #04844b; }
     .limit-screen   h2 { color: #c23934; }
-
-    .counter-badge {
-      display: inline-block;
-      background: #f0f4ff;
-      border: 1px solid #c7d8f5;
-      border-radius: 1rem;
-      padding: 0.2rem 0.75rem;
-      font-size: 0.78rem;
-      color: #16325c;
-      margin-bottom: 1.5rem;
-    }
 
     @media (max-width: 480px) {
       .row { flex-direction: column; gap: 0; }
@@ -188,63 +166,70 @@
 
     <div class="error-banner" id="errorBanner"></div>
 
-    <div class="counter-badge" id="counterBadge">Loading…</div>
-
     <form id="leadForm" novalidate>
 
+      <!-- Contact info -->
       <div class="row">
         <div class="field">
           <label for="firstName">First Name</label>
-          <input type="text" id="firstName" name="firstName"
-                 autocomplete="given-name" placeholder="Jane"/>
+          <input type="text" id="firstName" autocomplete="given-name" placeholder="Jane"/>
         </div>
         <div class="field">
           <label for="lastName">Last Name <span class="req">*</span></label>
-          <input type="text" id="lastName" name="lastName" required
-                 autocomplete="family-name" placeholder="Smith"/>
+          <input type="text" id="lastName" required autocomplete="family-name" placeholder="Smith"/>
         </div>
       </div>
 
       <div class="field">
         <label for="company">Company <span class="req">*</span></label>
-        <input type="text" id="company" name="company" required
-               autocomplete="organization" placeholder="ACME Corp"/>
+        <input type="text" id="company" required autocomplete="organization" placeholder="ACME Corp"/>
       </div>
 
       <div class="row">
         <div class="field">
           <label for="email">Email <span class="req">*</span></label>
-          <input type="email" id="email" name="email" required
-                 autocomplete="email" placeholder="jane@acme.com"/>
+          <input type="email" id="email" required autocomplete="email" placeholder="jane@acme.com"/>
         </div>
         <div class="field">
           <label for="phone">Phone</label>
-          <input type="tel" id="phone" name="phone"
-                 autocomplete="tel" placeholder="+1 555 000 0000"/>
+          <input type="tel" id="phone" autocomplete="tel" placeholder="+1 555 000 0000"/>
         </div>
       </div>
 
       <div class="field">
         <label for="website">Website</label>
-        <input type="url" id="website" name="website"
-               autocomplete="url" placeholder="https://acme.com"/>
+        <input type="url" id="website" autocomplete="url" placeholder="https://acme.com"/>
       </div>
+
+      <!-- Address -->
+      <div class="section-label">Address</div>
 
       <div class="field">
-        <label for="addressSearch">Address</label>
-        <div class="address-wrapper">
-          <input type="text" id="addressSearch" autocomplete="off"
-                 placeholder="Start typing your address…"/>
-        </div>
-        <div class="address-confirmed" id="addrConfirmed"></div>
+        <label for="street">Street</label>
+        <input type="text" id="street" autocomplete="street-address" placeholder="123 Main St"/>
       </div>
 
-      <!-- Hidden address components -->
-      <input type="hidden" id="street"/>
-      <input type="hidden" id="city"/>
-      <input type="hidden" id="state"/>
-      <input type="hidden" id="postalCode"/>
-      <input type="hidden" id="country"/>
+      <div class="row">
+        <div class="field">
+          <label for="city">City</label>
+          <input type="text" id="city" autocomplete="address-level2" placeholder="Austin"/>
+        </div>
+        <div class="field">
+          <label for="state">State / Province</label>
+          <input type="text" id="state" autocomplete="address-level1" placeholder="TX"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="postalCode">ZIP / Postal Code</label>
+          <input type="text" id="postalCode" autocomplete="postal-code" placeholder="78701"/>
+        </div>
+        <div class="field">
+          <label for="country">Country</label>
+          <input type="text" id="country" autocomplete="country-name" placeholder="US"/>
+        </div>
+      </div>
 
       <!-- reCAPTCHA v2 -->
       <div class="captcha-wrap">
@@ -258,73 +243,24 @@
   </div>
 </div>
 
-<!-- Google Places (loaded after page ready) -->
-<script>
-function initPlaces() {
-  var input = document.getElementById('addressSearch');
-  var autocomplete = new google.maps.places.Autocomplete(input, {
-    types: ['address'],
-    fields: ['address_components', 'formatted_address']
-  });
-
-  autocomplete.addListener('place_changed', function() {
-    var place = autocomplete.getPlace();
-    if (!place.address_components) return;
-
-    // Reset hidden fields
-    ['street','city','state','postalCode','country'].forEach(function(id) {
-      document.getElementById(id).value = '';
-    });
-
-    var streetNumber = '', route = '';
-    place.address_components.forEach(function(c) {
-      var t = c.types[0];
-      if (t === 'street_number')               streetNumber = c.long_name;
-      else if (t === 'route')                  route = c.long_name;
-      else if (t === 'locality')               document.getElementById('city').value = c.long_name;
-      else if (t === 'administrative_area_level_1') document.getElementById('state').value = c.short_name;
-      else if (t === 'postal_code')            document.getElementById('postalCode').value = c.long_name;
-      else if (t === 'country')                document.getElementById('country').value = c.short_name;
-    });
-    document.getElementById('street').value = (streetNumber + ' ' + route).trim();
-
-    var confirmed = document.getElementById('addrConfirmed');
-    confirmed.textContent   = place.formatted_address;
-    confirmed.style.display = 'block';
-  });
-
-  input.addEventListener('input', function() {
-    document.getElementById('addrConfirmed').style.display = 'none';
-    ['street','city','state','postalCode','country'].forEach(function(id) {
-      document.getElementById(id).value = '';
-    });
-  });
-}
-</script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRoGQnG_fyUwMTG8aODTBJwrRCtjPTEM8&libraries=places&callback=initPlaces" async defer></script>
-
-<!-- reCAPTCHA -->
+<!-- reCAPTCHA only — no Google Maps needed -->
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 <script>
 (function() {
-
-  var form        = document.getElementById('leadForm');
-  var submitBtn   = document.getElementById('submitBtn');
-  var errorBanner = document.getElementById('errorBanner');
-  var formBody    = document.getElementById('formBody');
+  var form          = document.getElementById('leadForm');
+  var submitBtn     = document.getElementById('submitBtn');
+  var errorBanner   = document.getElementById('errorBanner');
+  var formBody      = document.getElementById('formBody');
   var successScreen = document.getElementById('successScreen');
   var limitScreen   = document.getElementById('limitScreen');
-  var counterBadge  = document.getElementById('counterBadge');
 
   function showError(msg) {
     errorBanner.textContent   = msg;
     errorBanner.style.display = 'block';
     window.scrollTo(0, 0);
   }
-  function hideError() {
-    errorBanner.style.display = 'none';
-  }
+  function hideError() { errorBanner.style.display = 'none'; }
 
   form.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -332,7 +268,6 @@ function initPlaces() {
 
     var captchaToken = typeof grecaptcha !== 'undefined'
       ? grecaptcha.getResponse() : '';
-
     if (!captchaToken) {
       showError('Please complete the reCAPTCHA checkbox.');
       return;
@@ -348,11 +283,11 @@ function initPlaces() {
       email:        document.getElementById('email').value.trim(),
       phone:        document.getElementById('phone').value.trim(),
       website:      document.getElementById('website').value.trim(),
-      street:       document.getElementById('street').value,
-      city:         document.getElementById('city').value,
-      state:        document.getElementById('state').value,
-      postalCode:   document.getElementById('postalCode').value,
-      country:      document.getElementById('country').value,
+      street:       document.getElementById('street').value.trim(),
+      city:         document.getElementById('city').value.trim(),
+      state:        document.getElementById('state').value.trim(),
+      postalCode:   document.getElementById('postalCode').value.trim(),
+      country:      document.getElementById('country').value.trim(),
       captchaToken: captchaToken
     };
 
@@ -361,18 +296,20 @@ function initPlaces() {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(payload)
     })
-    .then(function(res) { return res.json().then(function(data) {
-      return { status: res.status, data: data };
-    }); })
+    .then(function(res) {
+      return res.json().then(function(data) {
+        return { status: res.status, data: data };
+      });
+    })
     .then(function(r) {
       if (r.status === 429) {
-        formBody.style.display  = 'none';
-        limitScreen.style.display = 'block';
+        formBody.style.display        = 'none';
+        limitScreen.style.display     = 'block';
         return;
       }
       if (r.data.success) {
-        formBody.style.display    = 'none';
-        successScreen.style.display = 'block';
+        formBody.style.display        = 'none';
+        successScreen.style.display   = 'block';
       } else {
         showError(r.data.message || 'Something went wrong. Please try again.');
         submitBtn.disabled    = false;
@@ -387,10 +324,6 @@ function initPlaces() {
       if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
     });
   });
-
-  // Update counter badge (optional — remove if you don't want to show it)
-  counterBadge.style.display = 'none'; // hide until we have data
-
 })();
 </script>
 
