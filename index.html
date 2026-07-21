@@ -204,7 +204,7 @@
     }
     label .req { color: var(--barca-red); margin-left: 2px; }
 
-    input[type=text], input[type=email], input[type=tel], input[type=url] {
+    input[type=text], input[type=email], input[type=tel], input[type=url], select {
       width: 100%;
       padding: 0.6rem 0.85rem;
       border: 1.5px solid #d8d8d8;
@@ -215,10 +215,19 @@
       transition: border-color 0.15s, box-shadow 0.15s;
       background: var(--off-white);
     }
-    input:focus {
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%23004D98' d='M2 4l4 4 4-4z'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 0.85rem center;
+      padding-right: 2rem;
+    }
+    input:focus, select:focus {
       outline: none;
       border-color: var(--barca-blue);
-      background: var(--white);
+      background-color: var(--white);
       box-shadow: 0 0 0 3px rgba(0,77,152,0.12);
     }
 
@@ -408,7 +417,60 @@
         </div>
         <div class="field">
           <label for="state">State / Province</label>
-          <input type="text" id="state" autocomplete="address-level1" placeholder="TX"/>
+          <select id="state" autocomplete="address-level1">
+            <option value="">— Select —</option>
+            <option>Alabama</option>
+            <option>Alaska</option>
+            <option>Arizona</option>
+            <option>Arkansas</option>
+            <option>California</option>
+            <option>Colorado</option>
+            <option>Connecticut</option>
+            <option>Delaware</option>
+            <option>District of Columbia</option>
+            <option>Florida</option>
+            <option>Georgia</option>
+            <option>Hawaii</option>
+            <option>Idaho</option>
+            <option>Illinois</option>
+            <option>Indiana</option>
+            <option>Iowa</option>
+            <option>Kansas</option>
+            <option>Kentucky</option>
+            <option>Louisiana</option>
+            <option>Maine</option>
+            <option>Maryland</option>
+            <option>Massachusetts</option>
+            <option>Michigan</option>
+            <option>Minnesota</option>
+            <option>Mississippi</option>
+            <option>Missouri</option>
+            <option>Montana</option>
+            <option>Nebraska</option>
+            <option>Nevada</option>
+            <option>New Hampshire</option>
+            <option>New Jersey</option>
+            <option>New Mexico</option>
+            <option>New York</option>
+            <option>North Carolina</option>
+            <option>North Dakota</option>
+            <option>Ohio</option>
+            <option>Oklahoma</option>
+            <option>Oregon</option>
+            <option>Pennsylvania</option>
+            <option>Rhode Island</option>
+            <option>South Carolina</option>
+            <option>South Dakota</option>
+            <option>Tennessee</option>
+            <option>Texas</option>
+            <option>Utah</option>
+            <option>Vermont</option>
+            <option>Virginia</option>
+            <option>Washington</option>
+            <option>West Virginia</option>
+            <option>Wisconsin</option>
+            <option>Wyoming</option>
+          </select>
         </div>
       </div>
 
@@ -419,7 +481,14 @@
         </div>
         <div class="field">
           <label for="country">Country</label>
-          <input type="text" id="country" autocomplete="country-name" placeholder="US"/>
+          <select id="country" autocomplete="country-name">
+            <option value="United States" selected>United States</option>
+            <option>Canada</option>
+            <option>United Kingdom</option>
+            <option>Australia</option>
+            <option>Ireland</option>
+            <option>Mexico</option>
+          </select>
         </div>
       </div>
 
