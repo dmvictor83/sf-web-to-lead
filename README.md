@@ -20,6 +20,68 @@ In-site:   Experience Cloud LWC ──@AuraEnabled────────▶ su
 
 ---
 
+## Security model
+
+**There is no authentication.** A public web page cannot hold a secret — anything in client-side
+HTML/JS (API keys, tokens) is visible via *View Source*. So both endpoints are **anonymous and
+open**: anyone on the internet can POST to them (with `curl`, Postman, a script — not just the form).
+Salesforce runs each request as a locked-down **guest user** (`W2L Profile`).
+
+Because there's no auth, security comes from **constraining what the endpoint can do and who can
+usefully call it** — defense in depth:
+
+| Layer | What it protects against | Where it lives |
+|-------|--------------------------|----------------|
+| **Least-privilege guest** | The guest can *only* create `Lead` + `W2L_Submission__c`. It can't read your data, delete, or touch any other object. | `W2L Profile` |
+| **reCAPTCHA v2 (server-verified)** | Bots. The token is verified server-side against Google; the secret key never reaches the browser. | `W2LController.verifyCaptcha` |
+| **Rate limit (1,000/month)** | Runaway abuse volume. Counts `W2L_Submission__c` records for the month. | `W2LController.currentMonthCount` |
+| **Validation + sanitization** | Bad data / stored XSS. Requires last name, company, valid email; `stripHtmlTags()` on every field. | `W2LController.process` |
+| **CORS allowlist** | *Other* websites reading the response in a victim's browser. | `GitHubPages` + Apex headers |
+
+### What CORS is (and isn't)
+
+CORS is a **browser** rule: it decides whether JavaScript on origin A may *read* a response from
+server B. Server B grants it with the `Access-Control-Allow-Origin` header. It is **not** an
+access-control or anti-abuse mechanism — `curl`/Postman/servers ignore CORS entirely. So CORS here
+is a browser-trust signal, **not** a security boundary.
+
+> The external form sends `Content-Type: text/plain` specifically to stay a CORS "simple request"
+> and skip the preflight `OPTIONS` call, which Salesforce guest sites don't answer.
+
+### Real, honest risks
+
+- **Direct calls bypass the form.** reCAPTCHA and CORS are browser-enforced; a script can hit the
+  endpoint directly. reCAPTCHA (which requires solving a challenge) is the meaningful bot deterrent —
+  **not** CORS.
+- **Spam leads.** Captcha-solving services exist; some junk will get through. The rate limit caps
+  the blast radius at 1,000/month, but those could be 1,000 junk leads.
+- **Global rate limit = possible DoS of lead capture.** The 1,000/month counter is org-wide, so one
+  abuser could exhaust the quota and block legitimate submissions. (Per-IP limiting isn't practical
+  on a guest site — Apex can't reliably see the client IP.)
+- **Secret key stored as plain text.** `W2L_Settings__c.ReCaptcha_Secret_Key__c` is a Text field
+  (EncryptedText wasn't available at this API version). It's server-side only (never shipped to the
+  browser), but it isn't encrypted at rest — anyone with access to that setting can read it.
+- **Guest user is a known Salesforce attack surface.** Safety depends on the guest profile staying
+  minimal. If someone later widens its object/field access, or a sharing rule leaks records to it,
+  the anonymous endpoint inherits that. This is exactly why W2L uses its **own** minimal guest
+  profile, isolated from any other site's guest.
+
+### Golden rules
+
+- Never expose anything the guest can *read* — it should only *create* Leads.
+- Keep **reCAPTCHA** as the primary bot defense; treat CORS as convenience, not security.
+- Keep the guest profile minimal and **audit it periodically**.
+- Rotate the reCAPTCHA keys if they're ever shared in plain text.
+
+> **Want a stronger boundary?** Put a small server-side proxy (e.g. a Cloudflare Worker or Netlify
+> function) in front. It can hold a real OAuth secret, do proper per-IP or per-country throttling,
+> and hide the Salesforce endpoint — the browser talks to the proxy, the proxy talks to Salesforce
+> with real credentials. That trades a maintained server for tighter control. Country-level geo
+> restriction (e.g. US/CA/IL only) is only possible via such a proxy — Salesforce has no native
+> geo-blocking for guest endpoints, and geo-IP is easily bypassed by VPNs anyway.
+
+---
+
 ## Repo layout
 
 Each row is one component and what it does. "Used by" shows which entry point relies on it —
