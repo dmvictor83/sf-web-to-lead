@@ -40,7 +40,6 @@ In-site:   Experience Cloud LWC  --@AuraEnabled-->        submitLead            
 | CustomObject | `W2L_Submission__c` | One record per submission; used for monthly rate-limit counting |
 | CustomObject | `W2L_Settings__c` | Hierarchy custom setting: reCAPTCHA keys + monthly limit |
 | Profile | `W2L Profile` | Experience Cloud guest profile, scoped to Lead + W2L_Submission__c create |
-| Profile | `Payment Portal Profile` | W2L access revoked (isolation from the payment guest) |
 | CorsWhitelistOrigin | `GitHubPages` | Allows `dmvictor83.github.io` |
 | RemoteSiteSetting | `GoogleRecaptcha` | Apex callout to `https://www.google.com` (siteverify) |
 | CspTrustedSite | `GoogleRecaptcha`, `GoogleRecaptchaStatic` | reCAPTCHA assets |

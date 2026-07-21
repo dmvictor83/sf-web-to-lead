@@ -45,7 +45,6 @@ Each row is one component and what it does. "Used by" shows which entry point re
 | `W2L_Submission__c` | Custom object | Both | One record is created per submission. The monthly rate limit counts these. |
 | `W2L_Settings__c` | Custom setting | Both | Stores the reCAPTCHA **site key**, **secret key**, and **monthly limit**. Read by the Apex at runtime. |
 | `W2L Profile` | Profile | In-site | The Experience Cloud site's **guest user** profile, scoped to *only* create `Lead` + `W2L_Submission__c`. This is the isolated identity the public uses. |
-| `Payment Portal Profile` | Profile | — | The *other* site's guest profile, with W2L access **removed** — proves the two guests are isolated. Only relevant if that payment site also exists in your org. |
 | `GitHubPages` | CORS whitelist | External | Allows the browser on `dmvictor83.github.io` to read the endpoint's response. |
 | `GoogleRecaptcha` | Remote site setting | Both | Lets the Apex make its server-side callout to Google to verify the token. |
 | `GoogleRecaptcha`, `GoogleRecaptchaStatic` | CSP trusted sites | Both | Allow the reCAPTCHA scripts/assets to load in the browser. |
