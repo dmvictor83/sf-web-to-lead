@@ -22,22 +22,36 @@ In-site:   Experience Cloud LWC ──@AuraEnabled────────▶ su
 
 ## Repo layout
 
-```
-index.html                         External static form (GitHub Pages)
-sfdx-project.json                  SFDX project config
-force-app/main/default/
-  classes/W2LController*            REST + Aura Apex, shared process()
-  classes/W2LControllerTest*       Tests (11, full coverage)
-  lwc/w2lLeadForm/                 In-site Experience Cloud form
-  staticresources/w2lCaptcha*      reCAPTCHA iframe host (bypasses LWS)
-  objects/W2L_Submission__c/       Rate-limit tracking object
-  objects/W2L_Settings__c/         Custom setting: reCAPTCHA keys + limit
-  profiles/W2L Profile*            Experience Cloud guest, scoped to Lead + submission create
-  profiles/Payment Portal Profile* W2L access revoked (guest isolation)
-  corswhitelistorigins/GitHubPages*
-  remoteSiteSettings/GoogleRecaptcha*
-  cspTrustedSites/GoogleRecaptcha*, GoogleRecaptchaStatic*
-```
+Each row is one component and what it does. "Used by" shows which entry point relies on it —
+**External** (GitHub Pages form), **In-site** (Experience Cloud LWC), or **Both**.
+
+### Root
+
+| File | What it is |
+|------|------------|
+| `index.html` | The external static form. Deploy this to GitHub Pages. |
+| `sfdx-project.json` | SFDX project config so `sf project deploy start` works. |
+| `CLAUDE.md` | Architecture notes + gotchas for anyone (or Claude) editing the repo. |
+| `README.md` | This file — deploy guide. |
+
+### Salesforce metadata (`force-app/main/default/`)
+
+| Component | Type | Used by | What it does |
+|-----------|------|:-------:|--------------|
+| `W2LController` | Apex class | Both | The brain. Verifies reCAPTCHA, enforces the monthly limit, validates, inserts the Lead. Exposes a REST method (`@HttpPost`, for the external form) and an Aura method (`@AuraEnabled submitLead`, for the LWC) that share one `process()` method. |
+| `W2LControllerTest` | Apex class | — | 11 unit tests covering captcha, rate limit, validation, and both entry points. |
+| `w2lLeadForm` | LWC | In-site | The form component you drag onto the Experience Cloud page. |
+| `w2lCaptcha` | Static resource | In-site | A tiny HTML page that hosts the reCAPTCHA widget in an `<iframe>`. Needed because Lightning Web Security won't let reCAPTCHA run directly inside an LWC. |
+| `W2L_Submission__c` | Custom object | Both | One record is created per submission. The monthly rate limit counts these. |
+| `W2L_Settings__c` | Custom setting | Both | Stores the reCAPTCHA **site key**, **secret key**, and **monthly limit**. Read by the Apex at runtime. |
+| `W2L Profile` | Profile | In-site | The Experience Cloud site's **guest user** profile, scoped to *only* create `Lead` + `W2L_Submission__c`. This is the isolated identity the public uses. |
+| `Payment Portal Profile` | Profile | — | The *other* site's guest profile, with W2L access **removed** — proves the two guests are isolated. Only relevant if that payment site also exists in your org. |
+| `GitHubPages` | CORS whitelist | External | Allows the browser on `dmvictor83.github.io` to read the endpoint's response. |
+| `GoogleRecaptcha` | Remote site setting | Both | Lets the Apex make its server-side callout to Google to verify the token. |
+| `GoogleRecaptcha`, `GoogleRecaptchaStatic` | CSP trusted sites | Both | Allow the reCAPTCHA scripts/assets to load in the browser. |
+
+> Every metadata component is actually two files — the component plus a `*-meta.xml` descriptor.
+> They're listed here once for clarity.
 
 ---
 
