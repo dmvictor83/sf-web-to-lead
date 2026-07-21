@@ -38,6 +38,47 @@ usefully call it** — defense in depth:
 | **Validation + sanitization** | Bad data / stored XSS. Requires last name, company, valid email; `stripHtmlTags()` on every field. | `W2LController.process` |
 | **CORS allowlist** | *Other* websites reading the response in a victim's browser. | `GitHubPages` + Apex headers |
 
+### Request flow (both entry points)
+
+```mermaid
+sequenceDiagram
+    actor U as Visitor (browser)
+    participant EF as GitHub Pages form
+    participant IL as Experience Cloud LWC
+    participant G as SF guest user (W2L Profile)
+    participant A as W2LController (Apex)
+    participant R as Google reCAPTCHA
+    participant DB as Lead + W2L_Submission__c
+
+    Note over U,DB: No login, no token, no API key — anonymous public access
+
+    alt External page (cross-origin)
+        U->>EF: fill form + solve reCAPTCHA checkbox
+        EF->>G: POST /services/apexrest/w2l/ (text/plain JSON)
+        Note right of EF: text/plain skips the CORS preflight
+    else In-site page (same-origin)
+        U->>IL: fill form + solve reCAPTCHA (sandboxed iframe)
+        IL->>G: @AuraEnabled submitLead(payloadJson)
+    end
+
+    G->>A: runs as guest — only Lead + submission create
+    A->>R: verify captcha token (secret key, server-side)
+    R-->>A: success / fail
+    alt captcha ok AND under monthly limit
+        A->>DB: insert Lead + W2L_Submission__c
+        A-->>U: { success: true }
+    else rejected
+        A-->>U: 403 captcha / 429 limit / 400 validation
+    end
+```
+
+**How "authentication" works here:** it doesn't — and that's by design. Neither page sends
+credentials. Salesforce assigns every anonymous request the **guest user** identity tied to the
+site, and that guest's profile (`W2L Profile`) is scoped to *only* create a `Lead` and a
+`W2L_Submission__c`. The external and in-site pages differ only in **transport** (REST vs.
+`@AuraEnabled`); both converge on the same guest identity and the same `process()` logic, where the
+real controls — reCAPTCHA, rate limit, validation — are enforced server-side.
+
 ### What CORS is (and isn't)
 
 CORS is a **browser** rule: it decides whether JavaScript on origin A may *read* a response from
