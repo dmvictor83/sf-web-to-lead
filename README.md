@@ -58,11 +58,36 @@ Each row is one component and what it does. "Used by" shows which entry point re
 
 Steps marked **🖐 MANUAL** cannot be done via CLI/metadata — they are Setup UI actions.
 
-### 1. Google reCAPTCHA keys (one-time)
-1. Go to [reCAPTCHA admin](https://www.google.com/recaptcha/admin) → register a site.
-2. Type: **reCAPTCHA v2 → "I'm not a robot" checkbox**.
-3. Copy the **site key** and **secret key**.
-4. Under **Domains**, add every host that will show the form (see step 7).
+### 1. 🖐 MANUAL — Create Google reCAPTCHA keys (one-time)
+
+You need a Google account. reCAPTCHA v2 is free (up to ~1M assessments/month).
+
+1. Go to the **reCAPTCHA admin console**: <https://www.google.com/recaptcha/admin/create>
+   (if you've used reCAPTCHA before, open <https://www.google.com/recaptcha/admin> and click the **＋** to register a new site).
+2. Fill in the registration form:
+   - **Label** — any name to recognize it later, e.g. `W2L Form`.
+   - **reCAPTCHA type** — choose **Challenge (v2)**, then the sub-option **"I'm not a robot" Checkbox**.
+     *(Do not pick v3 or the invisible variant — this solution uses the v2 checkbox.)*
+   - **Domains** — add every hostname that will display the form, one per line,
+     **hostname only** (no `https://`, no path, no port):
+     - `dmvictor83.github.io` — your GitHub Pages host (the external form)
+     - `<your-domain>.my.site.com` — your Experience Cloud host (the in-site form)
+     - `localhost` — optional, only if you want to test locally
+   - **Owners** — your Google email is added automatically.
+   - Accept the **Terms of Service** and click **Submit**.
+3. Google shows two keys — copy both:
+   - **Site key** (public) — goes in the client (HTML / static resource). Safe to expose.
+   - **Secret key** (private) — used only in server-side Apex. **Never** put it in HTML.
+4. You'll store these in Salesforce in **step 6** (`W2L_Settings__c`).
+
+> **Adding a domain later:** open the site in the admin console → the **⚙ Settings** (gear) →
+> **Domains** → add the hostname → **Save**. Changes take ~30–60 seconds to propagate. The classic
+> symptom of a missing domain is the widget showing **"ERROR for site owner: Invalid domain for site key."**
+
+> **Where each key ends up:**
+> - Site key → `W2L_Settings__c.ReCaptcha_Site_Key__c` **and** it appears in `index.html` /
+>   the `w2lCaptcha` static resource (this is expected — the site key is public).
+> - Secret key → `W2L_Settings__c.ReCaptcha_Secret_Key__c` **only** (server-side, never shipped to the browser).
 
 ### 2. Authenticate the CLI
 ```bash
@@ -99,11 +124,14 @@ sf data create record --target-org devedition --sobject W2L_Settings__c \
 > Or via **Setup → Custom Settings → W2L Settings → Manage → New** (org default).
 > The **secret** key stays server-side only — never put it in HTML.
 
-### 7. 🖐 MANUAL — Add hosts to reCAPTCHA allowed domains
-In the [reCAPTCHA admin](https://www.google.com/recaptcha/admin) → your site key → **Domains**, add
-(hostname only, no `https://`, no path):
+### 7. 🖐 MANUAL — Confirm reCAPTCHA allowed domains
+You added these in **step 1**, but confirm the site key's **Domains** list (admin console → site →
+**⚙ Settings → Domains**) includes both hosts — you may not have known your `my.site.com` domain until
+you enabled Digital Experiences in step 3:
 - `dmvictor83.github.io` (or your GitHub Pages host) — for the external form
 - `<your-domain>.my.site.com` — for the in-site form
+
+Add any that are missing (hostname only), then wait ~30–60 seconds.
 
 ### 8. 🖐 MANUAL — Configure the Experience site (Experience Builder)
 Open **Setup → Digital Experiences → All Sites → W2L → Builder**, then:
