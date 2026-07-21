@@ -38,46 +38,70 @@ usefully call it** — defense in depth:
 | **Validation + sanitization** | Bad data / stored XSS. Requires last name, company, valid email; `stripHtmlTags()` on every field. | `W2LController.process` |
 | **CORS allowlist** | *Other* websites reading the response in a victim's browser. | `GitHubPages` + Apex headers |
 
-### Request flow (both entry points)
+### Request flow
+
+**How "authentication" works here:** it doesn't — and that's by design. Neither page sends
+credentials. Salesforce assigns every anonymous request the **guest user** identity tied to the
+site, and that guest's profile (`W2L Profile`) is scoped to *only* create a `Lead` and a
+`W2L_Submission__c`. The two pages differ only in **transport**; both converge on the same guest
+identity and the same `process()` logic, where the real controls — reCAPTCHA, rate limit, validation
+— are enforced server-side.
+
+#### Flow A — External page (GitHub Pages → REST)
 
 ```mermaid
 sequenceDiagram
     actor U as Visitor (browser)
     participant EF as GitHub Pages form
-    participant IL as Experience Cloud LWC
     participant G as SF guest user (W2L Profile)
-    participant A as W2LController (Apex)
+    participant A as W2LController.handlePost (REST)
     participant R as Google reCAPTCHA
     participant DB as Lead + W2L_Submission__c
 
-    Note over U,DB: No login, no token, no API key — anonymous public access
-
-    alt External page (cross-origin)
-        U->>EF: fill form + solve reCAPTCHA checkbox
-        EF->>G: POST /services/apexrest/w2l/ (text/plain JSON)
-        Note right of EF: text/plain skips the CORS preflight
-    else In-site page (same-origin)
-        U->>IL: fill form + solve reCAPTCHA (sandboxed iframe)
-        IL->>G: @AuraEnabled submitLead(payloadJson)
-    end
-
-    G->>A: runs as guest — only Lead + submission create
+    Note over U,DB: Cross-origin · no login, token, or API key
+    U->>EF: fill form + solve reCAPTCHA checkbox
+    EF->>G: POST /services/apexrest/w2l/ (text/plain JSON)
+    Note right of EF: text/plain keeps it a CORS "simple request" (no preflight)
+    G->>A: run as guest (only Lead + submission create)
     A->>R: verify captcha token (secret key, server-side)
     R-->>A: success / fail
     alt captcha ok AND under monthly limit
         A->>DB: insert Lead + W2L_Submission__c
-        A-->>U: { success: true }
+        A-->>EF: 200 { success: true }
     else rejected
-        A-->>U: 403 captcha / 429 limit / 400 validation
+        A-->>EF: 403 captcha / 429 limit / 400 validation
     end
+    EF-->>U: success screen / error message
 ```
 
-**How "authentication" works here:** it doesn't — and that's by design. Neither page sends
-credentials. Salesforce assigns every anonymous request the **guest user** identity tied to the
-site, and that guest's profile (`W2L Profile`) is scoped to *only* create a `Lead` and a
-`W2L_Submission__c`. The external and in-site pages differ only in **transport** (REST vs.
-`@AuraEnabled`); both converge on the same guest identity and the same `process()` logic, where the
-real controls — reCAPTCHA, rate limit, validation — are enforced server-side.
+#### Flow B — In-site page (Experience Cloud LWC → Apex)
+
+```mermaid
+sequenceDiagram
+    actor U as Visitor (browser)
+    participant IL as Experience Cloud LWC (w2lLeadForm)
+    participant IF as reCAPTCHA iframe (w2lCaptcha)
+    participant G as SF guest user (W2L Profile)
+    participant A as W2LController.submitLead (@AuraEnabled)
+    participant R as Google reCAPTCHA
+    participant DB as Lead + W2L_Submission__c
+
+    Note over U,DB: Same-origin (no CORS) · no login, token, or API key
+    U->>IL: fill form fields
+    U->>IF: solve reCAPTCHA checkbox (sandboxed iframe)
+    IF-->>IL: token via postMessage
+    IL->>G: @AuraEnabled submitLead(payloadJson)
+    G->>A: run as guest (only Lead + submission create)
+    A->>R: verify captcha token (secret key, server-side)
+    R-->>A: success / fail
+    alt captcha ok AND under monthly limit
+        A->>DB: insert Lead + W2L_Submission__c
+        A-->>IL: { success: true }
+    else rejected
+        A-->>IL: { statusCode: 403 / 429 / 400 }
+    end
+    IL-->>U: success screen / error message
+```
 
 ### What CORS is (and isn't)
 
