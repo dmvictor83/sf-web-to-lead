@@ -1,0 +1,95 @@
+:host {
+  --barca-blue: #004D98;
+  --barca-red:  #A50044;
+  --barca-gold: #EDBB00;
+  --barca-dark: #01264C;
+  display: block;
+}
+
+.w2l-card {
+  max-width: 620px;
+  margin: 0 auto;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(237,187,0,0.2);
+  font-family: 'Salesforce Sans', Arial, sans-serif;
+}
+
+.w2l-stripes { display: flex; height: 8px; }
+.w2l-stripes span { flex: 3; }
+.w2l-stripes span:nth-child(1) { background: var(--barca-blue); }
+.w2l-stripes span:nth-child(2) { background: var(--barca-red); }
+.w2l-stripes span:nth-child(3) { background: var(--barca-gold); flex: 1; }
+.w2l-stripes span:nth-child(4) { background: var(--barca-red); }
+.w2l-stripes span:nth-child(5) { background: var(--barca-blue); }
+
+.w2l-header {
+  background: linear-gradient(160deg, var(--barca-blue) 0%, var(--barca-dark) 60%, var(--barca-red) 160%);
+  padding: 1.75rem 2rem;
+}
+.w2l-header h1 {
+  color: #fff; font-size: 1.75rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 0.04em; margin: 0;
+}
+.w2l-header h1 span { color: var(--barca-gold); }
+.w2l-header p { color: rgba(255,255,255,0.7); font-style: italic; margin: 0.3rem 0 0; }
+
+.w2l-body { background: #fff; padding: 2rem; }
+
+.w2l-error {
+  background: #fff0f3; border: 1.5px solid var(--barca-red);
+  border-radius: 0.375rem; padding: 0.75rem 1rem;
+  color: var(--barca-red); margin-bottom: 1.25rem; font-weight: 500;
+}
+
+.w2l-row { display: flex; gap: 1rem; }
+.w2l-field { margin-bottom: 1.25rem; flex: 1; }
+.w2l-field label {
+  display: block; font-size: 0.75rem; font-weight: 600; color: #555;
+  margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.w2l-field input, .w2l-field select {
+  width: 100%; padding: 0.6rem 0.85rem; border: 1.5px solid #d8d8d8;
+  border-radius: 0.375rem; font-size: 0.95rem; background: #f5f5f7; box-sizing: border-box;
+}
+.w2l-field input:focus, .w2l-field select:focus {
+  outline: none; border-color: var(--barca-blue); background: #fff;
+  box-shadow: 0 0 0 3px rgba(0,77,152,0.12);
+}
+
+.w2l-section {
+  font-size: 0.8rem; font-weight: 700; color: var(--barca-blue);
+  text-transform: uppercase; letter-spacing: 0.1em; margin: 1.5rem 0 1rem;
+  border-bottom: 2px solid var(--barca-gold); padding-bottom: 0.35rem;
+}
+
+.w2l-captcha { margin: 1.5rem 0; }
+
+.w2l-submit {
+  width: 100%; padding: 0.85rem;
+  background: linear-gradient(135deg, var(--barca-red) 0%, #8B0039 100%);
+  color: #fff; border: none; border-radius: 0.375rem;
+  font-size: 1.1rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; cursor: pointer;
+}
+.w2l-submit:disabled { background: #c9c7c5; cursor: not-allowed; }
+
+.w2l-screen { text-align: center; padding: 3rem 1rem; }
+.w2l-icon {
+  width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 1.25rem;
+  display: flex; align-items: center; justify-content: center; font-size: 2.2rem;
+}
+.w2l-icon.success { background: linear-gradient(135deg, var(--barca-blue), var(--barca-dark)); color: var(--barca-gold); }
+.w2l-icon.limit { background: #fef1f1; }
+.w2l-screen h2 { font-size: 1.7rem; font-weight: 900; text-transform: uppercase; margin: 0 0 0.5rem; }
+.w2l-screen h2.ok { color: var(--barca-blue); }
+.w2l-screen h2.bad { color: var(--barca-red); }
+.w2l-screen p { color: #555; }
+.w2l-tag {
+  margin-top: 1rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--barca-gold);
+}
+
+.w2l-gold { height: 5px; background: linear-gradient(90deg, var(--barca-blue), var(--barca-gold), var(--barca-red)); }
+
+@media (max-width: 480px) { .w2l-row { flex-direction: column; gap: 0; } }

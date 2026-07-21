@@ -1,0 +1,117 @@
+<template>
+  <div class="w2l-card">
+    <div class="w2l-stripes">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="w2l-header">
+      <h1>Get in <span>touch</span></h1>
+      <p>Més que un club — More than a club</p>
+    </div>
+
+    <div class="w2l-body">
+
+      <template if:true={showForm}>
+        <template if:true={errorMessage}>
+          <div class="w2l-error">{errorMessage}</div>
+        </template>
+
+        <div class="w2l-row">
+          <div class="w2l-field">
+            <label>First Name</label>
+            <input type="text" data-field="firstName" value={form.firstName} onchange={handleInput}/>
+          </div>
+          <div class="w2l-field">
+            <label>Last Name *</label>
+            <input type="text" data-field="lastName" value={form.lastName} onchange={handleInput}/>
+          </div>
+        </div>
+
+        <div class="w2l-field">
+          <label>Company *</label>
+          <input type="text" data-field="company" value={form.company} onchange={handleInput}/>
+        </div>
+
+        <div class="w2l-row">
+          <div class="w2l-field">
+            <label>Email *</label>
+            <input type="email" data-field="email" value={form.email} onchange={handleInput}/>
+          </div>
+          <div class="w2l-field">
+            <label>Phone</label>
+            <input type="tel" data-field="phone" value={form.phone} onchange={handleInput}/>
+          </div>
+        </div>
+
+        <div class="w2l-field">
+          <label>Website</label>
+          <input type="url" data-field="website" value={form.website} onchange={handleInput}/>
+        </div>
+
+        <div class="w2l-section">Address</div>
+
+        <div class="w2l-field">
+          <label>Street</label>
+          <input type="text" data-field="street" value={form.street} onchange={handleInput}/>
+        </div>
+
+        <div class="w2l-row">
+          <div class="w2l-field">
+            <label>City</label>
+            <input type="text" data-field="city" value={form.city} onchange={handleInput}/>
+          </div>
+          <div class="w2l-field">
+            <label>State / Province</label>
+            <select data-field="state" onchange={handleInput}>
+              <option value="">— Select —</option>
+              <template for:each={states} for:item="s">
+                <option key={s} value={s}>{s}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+
+        <div class="w2l-row">
+          <div class="w2l-field">
+            <label>ZIP / Postal Code</label>
+            <input type="text" data-field="postalCode" value={form.postalCode} onchange={handleInput}/>
+          </div>
+          <div class="w2l-field">
+            <label>Country</label>
+            <select data-field="country" onchange={handleInput}>
+              <template for:each={countries} for:item="c">
+                <option key={c} value={c}>{c}</option>
+              </template>
+            </select>
+          </div>
+        </div>
+
+        <iframe class="w2l-captcha" src={captchaUrl} title="reCAPTCHA"
+                style={captchaStyle} frameborder="0" scrolling="no"></iframe>
+
+        <button class="w2l-submit" onclick={handleSubmit} disabled={submitting}>
+          {submitLabel}
+        </button>
+      </template>
+
+      <template if:true={showSuccess}>
+        <div class="w2l-screen">
+          <div class="w2l-icon success">⚽</div>
+          <h2 class="ok">Gol!</h2>
+          <p>We received your information and will be in touch soon.</p>
+          <p class="w2l-tag">Visca el Barça!</p>
+        </div>
+      </template>
+
+      <template if:true={showLimit}>
+        <div class="w2l-screen">
+          <div class="w2l-icon limit">⚠</div>
+          <h2 class="bad">Form unavailable</h2>
+          <p>Monthly submission limit reached. Please try again next month.</p>
+        </div>
+      </template>
+
+    </div>
+    <div class="w2l-gold"></div>
+  </div>
+</template>
