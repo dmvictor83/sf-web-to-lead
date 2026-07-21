@@ -123,6 +123,70 @@ is a browser-trust signal, **not** a security boundary.
 
 ---
 
+## What gets saved (Apex field mapping)
+
+On a successful submission, `W2LController.process()` creates **two records**:
+
+### 1. A `Lead` (standard object)
+
+Each JSON payload field maps to a standard `Lead` field. Every text value is trimmed and passed
+through `stripHtmlTags()` first (`sanitize()`).
+
+| Payload field (from form) | → | `Lead` field | Notes |
+|---------------------------|---|--------------|-------|
+| `firstName` | → | `FirstName` | optional |
+| `lastName` | → | `LastName` | **required** |
+| `company` | → | `Company` | **required** |
+| `email` | → | `Email` | **required**, format-validated |
+| `phone` | → | `Phone` | optional |
+| `website` | → | `Website` | optional |
+| `street` | → | `Street` | optional |
+| `city` | → | `City` | optional |
+| `state` | → | `State` | optional — **full name** ("Texas"), State picklist |
+| `postalCode` | → | `PostalCode` | optional |
+| `country` | → | `Country` | **full name** ("United States"), Country picklist |
+| *(constant)* | → | `LeadSource` | always set to `'Web'` |
+
+> `captchaToken` is **not** stored — it's consumed by server-side reCAPTCHA verification and discarded.
+
+The Lead lands in **Setup → Object Manager → Lead → Leads tab** (standard Lead list views /
+reports). It has no owner assignment logic here, so it follows your org's default guest-created-record
+ownership. Add assignment rules / a default lead owner if you need routing.
+
+### 2. A `W2L_Submission__c` (custom tracking object)
+
+One record per submission, linked to the Lead via the `Lead__c` lookup:
+
+| `W2L_Submission__c` field | Value |
+|---------------------------|-------|
+| `Name` | Auto-number |
+| `Lead__c` | Id of the Lead just inserted |
+| `CreatedDate` | (system) — the monthly rate limit counts these for the current month |
+
+This object exists so the **1,000/month rate limit** can be counted reliably (one row per accepted
+submission) without a race-prone counter field.
+
+```apex
+Lead lead = new Lead(
+    FirstName  = sanitize(body.get('firstName')),
+    LastName   = lastName,          // required
+    Company    = company,           // required
+    Email      = email,             // required + validated
+    Phone      = sanitize(body.get('phone')),
+    Website    = sanitize(body.get('website')),
+    Street     = sanitize(body.get('street')),
+    City       = sanitize(body.get('city')),
+    State      = sanitize(body.get('state')),
+    PostalCode = sanitize(body.get('postalCode')),
+    Country    = sanitize(body.get('country')),
+    LeadSource = 'Web'
+);
+insert lead;
+insert new W2L_Submission__c(Lead__c = lead.Id);
+```
+
+---
+
 ## Repo layout
 
 Each row is one component and what it does. "Used by" shows which entry point relies on it —
