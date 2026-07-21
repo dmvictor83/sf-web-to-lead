@@ -147,6 +147,43 @@ is a browser-trust signal, **not** a security boundary.
 
 ---
 
+## Design / theme (FC Barcelona)
+
+Both forms (`index.html` and the `w2lLeadForm` LWC) share a football-club visual theme — this was a
+one-off styling request ("make it look like FC Barcelona"), not a brand requirement, so treat it as
+freely replaceable. It's implemented in plain CSS, no images or icon libraries, so it's easy to swap.
+
+**Palette** (CSS variables — same names in both `index.html` and `w2lLeadForm.css`):
+
+| Variable | Hex | Used for |
+|----------|-----|----------|
+| `--barca-blue` | `#004D98` | Header gradient, focus rings, section underline |
+| `--barca-red` | `#A50044` | Submit button, error banner, one stripe color |
+| `--barca-gold` | `#EDBB00` | Accent stripe, section underline, success tagline |
+| `--barca-dark` | `#01264C` | Header gradient end |
+
+**Visual elements** (all hand-built CSS, no external assets):
+
+| Element | How it's built | Where |
+|---------|-----------------|-------|
+| Top stripe bar | 5 flex `<span>`s colored blue/red/gold/red/blue | `.w2l-stripes` / `.stripes` |
+| Crest | CSS `clip-path` shield split into 4 colored quadrants + a `+`-shaped overlay + a gold band | `.crest-*` classes (external form only — omitted in the LWC for simplicity) |
+| Header gradient | Diagonal `linear-gradient(160deg, blue → dark → red)` | `.w2l-header` / `.form-header` |
+| Section divider ("Address") | Bottom border in gold | `.w2l-section` / `.section-label` |
+| Submit button | Red gradient with a CSS-only shimmer sweep on hover (external form only) | `.btn-submit` |
+| Success screen | ⚽ emoji icon + "Gol!" heading + "Visca el Barça!" tagline in gold | `.success-screen` / `.w2l-screen` |
+
+**To replicate this theme in a new project:** copy the `<style>` block from `index.html` (or
+`w2lLeadForm.css`) wholesale, then find-and-replace the four `--barca-*` variables with a different
+palette — the layout/shapes are palette-agnostic.
+
+**To restyle as something else entirely:** the fastest path is to describe the target look (e.g. a
+different team, a plain corporate theme, dark mode) to an AI assistant and ask it to rewrite the
+`<style>`/`.css` block using the existing HTML structure — the class names and DOM shape don't need
+to change, only the CSS values.
+
+---
+
 ## What gets saved (Apex field mapping)
 
 On a successful submission, `W2LController.process()` creates **two records**:
