@@ -49,59 +49,11 @@ identity and the same `process()` logic, where the real controls — reCAPTCHA, 
 
 #### Flow A — External page (GitHub Pages → REST)
 
-```mermaid
-sequenceDiagram
-    actor U as Visitor (browser)
-    participant EF as GitHub Pages form
-    participant G as SF guest user (W2L Profile)
-    participant A as W2LController.handlePost (REST)
-    participant R as Google reCAPTCHA
-    participant DB as Lead + W2L_Submission__c
-
-    Note over U,DB: Cross-origin · no login, token, or API key
-    U->>EF: fill form + solve reCAPTCHA checkbox
-    EF->>G: POST /services/apexrest/w2l/ (text/plain JSON)
-    Note right of EF: text/plain keeps it a CORS "simple request" (no preflight)
-    G->>A: run as guest (only Lead + submission create)
-    A->>R: verify captcha token (secret key, server-side)
-    R-->>A: success / fail
-    alt captcha ok AND under monthly limit
-        A->>DB: insert Lead + W2L_Submission__c
-        A-->>EF: 200 { success: true }
-    else rejected
-        A-->>EF: 403 captcha / 429 limit / 400 validation
-    end
-    EF-->>U: success screen / error message
-```
+![W2L External Page Flow](w2l_flow_external.svg)
 
 #### Flow B — In-site page (Experience Cloud LWC → Apex)
 
-```mermaid
-sequenceDiagram
-    actor U as Visitor (browser)
-    participant IL as Experience Cloud LWC (w2lLeadForm)
-    participant IF as reCAPTCHA iframe (w2lCaptcha)
-    participant G as SF guest user (W2L Profile)
-    participant A as W2LController.submitLead (@AuraEnabled)
-    participant R as Google reCAPTCHA
-    participant DB as Lead + W2L_Submission__c
-
-    Note over U,DB: Same-origin (no CORS) · no login, token, or API key
-    U->>IL: fill form fields
-    U->>IF: solve reCAPTCHA checkbox (sandboxed iframe)
-    IF-->>IL: token via postMessage
-    IL->>G: @AuraEnabled submitLead(payloadJson)
-    G->>A: run as guest (only Lead + submission create)
-    A->>R: verify captcha token (secret key, server-side)
-    R-->>A: success / fail
-    alt captcha ok AND under monthly limit
-        A->>DB: insert Lead + W2L_Submission__c
-        A-->>IL: { success: true }
-    else rejected
-        A-->>IL: { statusCode: 403 / 429 / 400 }
-    end
-    IL-->>U: success screen / error message
-```
+![W2L In-Site Page Flow](w2l_flow_insite.svg)
 
 ### What CORS is (and isn't)
 
